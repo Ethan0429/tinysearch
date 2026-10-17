@@ -1,0 +1,19 @@
+{
+  "name": "tinysearch",
+  "version": "0.1.2",
+  "private": true,
+  "description": "Sourced stream answers inside DGG chat, with searchable history.",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test",
+    "lint:firefox": "addons-linter dist/firefox --warnings-as-errors",
+    "check": "npm run build && npm test && npm run lint:firefox",
+    "preview": "node scripts/preview.mjs"
+  },
+  "devDependencies": {
+    "happy-dom": "21.0.3",
+    "addons-linter": "10.14.0",
+    "fflate": "0.8.3",
+    "sharp": "0.35.5"
+  }
+}
