@@ -24,7 +24,7 @@
     const value = answer.chat_summary;
     const urls = typeof value === 'string' ? value.match(/https?:\/\/[^\s<>]+/g) || [] : [];
     if (typeof value === 'string' && value.trim() && !/[\r\n]/.test(value) &&
-        ('@Destiny ' + value).length <= 280 && urls.length <= 2 &&
+        value.replace(/https?:\/\/[^\s<>]+/g, '').trim().replace(/\s+/g, ' ').length <= 280 && urls.length <= 2 &&
         urls.every(url => DR.safeURL(url) && answer.sources.some(source => source && DR.safeURL(source.url) === DR.safeURL(url)))) return value.trim();
     return 'Summary unavailable. Open the full TinySearch answer for details.';
   };

@@ -7,18 +7,12 @@
     if (text !== undefined) node.textContent = text;
     return node;
   };
-  const button = (label, title, action, cls = '') => {
+  const button = (label, title, action, cls = '', iconName = null) => {
     const node = el('button', cls, label);
     node.type = 'button'; node.title = title; node.setAttribute('aria-label', title);
-    node.addEventListener('click', action); return node;
+    node.addEventListener('click', action); if(iconName)node.append(icon(iconName)); return node;
   };
-  function icon(kind) {
-    const node = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    for(const [key,value] of Object.entries({viewBox:'0 0 24 24',width:'16',height:'16',fill:'none',stroke:'currentColor','stroke-width':'1.8','stroke-linecap':'round','stroke-linejoin':'round','aria-hidden':'true'})) node.setAttribute(key,value);
-    const paths = kind === 'check' ? ['m5 12 4 4L19 6'] : kind === 'search' ? ['M20 20 15.7 15.7','M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0'] : ['M9 5H6a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3','M10 2h10v12H10z'];
-    for(const d of paths){const path=document.createElementNS(node.namespaceURI,'path');path.setAttribute('d',d);node.append(path);}
-    return node;
-  }
+  const icon = kind => TinyIcons.create(kind);
   function copyButton(answer, summaryOnly = false) {
     const control = el('button','copy-button');
     control.type = 'button';
@@ -44,36 +38,15 @@
     return control;
   }
 
-  const link = (label, url, cls = '') => {
+  const link = (label, url, cls = '', iconName = null) => {
     const node = el('a', cls, label);
+    if(iconName)node.append(icon(iconName));
     const safe = DR.safeURL(url);
     if (safe) { node.href = safe; node.target = '_blank'; node.rel = 'noopener noreferrer'; node.referrerPolicy = 'no-referrer'; }
     return node;
   };
   const stamp = value => new Date(value).toLocaleString(undefined, {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
-  function inlineText(node, text) {
-    // A deliberately small Markdown renderer: no HTML, images, scripts or remote assets.
-    const re = /(\[([^\]\n]{1,400})\]\((https?:\/\/[^\s)]+)\)|\*\*([^*\n]+)\*\*|`([^`\n]+)`|https?:\/\/[^\s<>]+)/g;
-    let offset = 0;
-    for (const match of text.matchAll(re)) {
-      node.append(document.createTextNode(text.slice(offset, match.index)));
-      if (match[2]) node.append(link(match[2], match[3]));
-      else if (match[4]) node.append(el('strong', '', match[4]));
-      else if (match[5]) node.append(el('code', '', match[5]));
-      else node.append(link(match[0], match[0]));
-      offset = match.index + match[0].length;
-    }
-    node.append(document.createTextNode(text.slice(offset)));
-  }
-  DR.markdown = text => {
-    const node = el('div', 'prose');
-    for (const block of text.split(/\n\s*\n/)) {
-      const p = el('p');
-      inlineText(p, block.replace(/^#{1,6}\s+/gm, '').replace(/^[-*]\s+/gm, '• '));
-      node.append(p);
-    }
-    return node;
-  };
+  DR.markdown = text => TinyMarkdown.render(text, 'prose');
   function shadow(host) {
     const root = host.attachShadow({mode:'open'});
     const style = el('style'); style.textContent = DR.styles; root.append(style); return root;
@@ -99,7 +72,7 @@
       prose.append(document.createTextNode(summary.slice(offset)));
       const footer = el('footer', 'card-actions');
       const time = el('time', '', stamp(answer.created_at)); time.dateTime = answer.created_at;
-      footer.append(button('Full answer ↗', 'Read the full answer in TinySearch', () => onBrowse(answer.id), 'text-button'), time);
+      footer.append(button('Full answer', 'Read the full answer in TinySearch', () => onBrowse(answer.id), 'text-button', 'arrow-up-right'), time);
       article.append(head, prose, footer); return article;
     }
     const article = el('article', `card${compact ? ' compact' : ''}`);
@@ -123,7 +96,7 @@
     }
     content.append(sources);
     const footer = el('footer', 'card-actions');
-    const watch = link('Watch moment ↗', answer.stream_url, 'watch');
+    const watch = link('Watch moment', answer.stream_url, 'watch', 'arrow-up-right');
     watch.title = 'Open the stream at the time this question was heard';
     footer.append(watch);
     article.append(head, meta, title, content, footer, el('p','disclaimer','AI answer · check the sources'));
@@ -154,16 +127,16 @@
       this.browse.setAttribute('aria-expanded','false');
       this.status = el('span', 'toolbar-status', 'Connecting…'); this.status.setAttribute('role','status');
       const nav = el('div','toolbar-nav');
-      this.prev = button('‹', 'Previous answer', () => this.step(-1), 'icon-button');
-      this.next = button('›', 'Next answer', () => this.step(1), 'icon-button');
-      nav.append(this.prev, this.next, button('☷','Search TinySearch history', () => {this.toggle(true);this.search.focus();}, 'icon-button'));
-      this.updateLink=link('Update ↗',DR.REPOSITORY+'/releases','update-link');
+      this.prev = button('', 'Previous answer', () => this.step(-1), 'icon-button', 'chevron-left');
+      this.next = button('', 'Next answer', () => this.step(1), 'icon-button', 'chevron-right');
+      nav.append(this.prev, this.next, button('','Search TinySearch history', () => {this.toggle(true);this.search.focus();}, 'icon-button', 'list'));
+      this.updateLink=link('Update',DR.REPOSITORY+'/releases','update-link','arrow-up-right');
       this.updateLink.hidden=true;this.updateLink.title='A TinySearch extension update is available';
       toolbar.append(this.browse,this.status,this.updateLink,nav);
       this.drawer = el('section','drawer'); this.drawer.hidden = true; this.drawer.setAttribute('aria-label','Answer history');
       const heading = el('div','drawer-heading');
       const name = el('div'); name.append(el('span','eyebrow','TINYSEARCH'),el('h2','','Answer history'));
-      heading.append(name,button('×','Close TinySearch history',()=>this.toggle(false),'icon-button close'));
+      heading.append(name,button('','Close TinySearch history',()=>this.toggle(false),'icon-button close','x'));
       this.search = el('input','search'); this.search.type = 'search';this.search.placeholder = 'Search questions, answers, sources…';
       this.search.setAttribute('aria-label','Search TinySearch history');
       this.search.addEventListener('input',()=>{this.query=this.search.value;this.renderHistory();});
@@ -175,8 +148,8 @@
       this.reader = el('div','reader');
       this.positionText = el('span','position-text');
       const readerNav = el('div','reader-nav');
-      this.older = button('← Older','Previous matching answer',()=>this.step(-1),'text-button');
-      this.newer = button('Newer →','Next matching answer',()=>this.step(1),'text-button');
+      this.older = button('Older','Previous matching answer',()=>this.step(-1),'text-button','arrow-left');
+      this.newer = button('Newer','Next matching answer',()=>this.step(1),'text-button','arrow-right');
       readerNav.append(this.older,this.positionText,this.newer);
       this.drawer.append(heading,this.search,filters,this.results,readerNav,this.reader);
       this.empty = el('p','empty');

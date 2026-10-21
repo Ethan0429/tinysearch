@@ -1,16 +1,20 @@
 {
   "releases": [
     {
+      "version": "0.1.5",
+      "notes": "- Lucide SVG icons throughout the interface.\n- Improved answer formatting for emphasis, lists, code, quotes and tables.\n- Chat summaries allow 280 characters of prose, with mentions and up to two source links counted separately."
+    },
+    {
       "version": "0.1.4",
-      "notes": "\u2022 Update notices in the popup, browser toolbar badge, and DGG chat toolbar.\n\u2022 Read release notes and check for updates from the popup.\n\u2022 The public live dashboard is available on Railway."
+      "notes": "- Update notices in the popup, browser toolbar badge, and DGG chat toolbar.\n- Read release notes and check for updates from the popup.\n- The public live dashboard is available on Railway."
     },
     {
       "version": "0.1.3",
-      "notes": "\u2022 Chat cards show complete short summaries with up to two sources.\n\u2022 Chat copy includes @Destiny and fits within 280 characters.\n\u2022 Full answers remain available in the detail panel."
+      "notes": "- Chat cards show complete short summaries with up to two sources.\n- Chat copy includes @Destiny and fits within 280 characters.\n- Full answers remain available in the detail panel."
     },
     {
       "version": "0.1.2",
-      "notes": "\u2022 TinySearch for Chrome and Firefox.\n\u2022 Sourced answers alongside DGG chat, with searchable history and stream timestamps."
+      "notes": "- TinySearch for Chrome and Firefox.\n- Sourced answers alongside DGG chat, with searchable history and stream timestamps."
     }
   ]
 }

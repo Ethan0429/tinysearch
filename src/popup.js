@@ -1,4 +1,5 @@
 (() => {
+  TinyIcons.hydrate();
   const api = globalThis.browser || globalThis.chrome;
   const status = document.querySelector('#status');
   const inputs = [...document.querySelectorAll('input')];
@@ -27,7 +28,7 @@
     for(const release of [...releases,...bundled]){
       if(seen.has(release.version))continue;seen.add(release.version);
       const section=document.createElement('section');
-      section.append(textNode('h2',`Version ${release.version}${release.preview?' · Preview':''}`),textNode('p',release.notes));output.append(section);
+      section.append(textNode('h2',`Version ${release.version}${release.preview?' · Preview':''}`),TinyMarkdown.render(release.notes, 'prose'));output.append(section);
     }
   }
   async function loadReleases(refresh=false){

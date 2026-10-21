@@ -1,3 +1,26 @@
 :root{color-scheme:dark;font:12px/1.5 system-ui,sans-serif;background:#110d18;color:#ede7f5}body{margin:0;width:310px}header{display:flex;align-items:center;gap:11px;padding:20px 18px 17px;border-bottom:1px solid #32263e}.mark{display:block;flex:0 0 40px;width:40px;height:40px;object-fit:contain;border-radius:8px;align-self:center}h1{font-size:17px;margin:0;letter-spacing:-.02em}header p{margin:3px 0 0;color:#b2a2c5;font-size:11px}main{padding:14px 18px}label{display:flex;align-items:center;justify-content:space-between;padding:9px 0;cursor:pointer}input{accent-color:#bba0ed;width:17px;height:17px;cursor:pointer}input:focus-visible,a:focus-visible{outline:2px solid #cfb3ff;outline-offset:4px}#status{font-size:10px;color:#bcaed0;min-height:15px;margin:9px 0 12px}.open{display:block;text-align:center;border:1px solid #78618e;background:#b58add15;border-radius:6px;padding:9px;color:#e1c6ff;text-decoration:none}.open:hover{background:#b58add25}.hint{font-size:10px;line-height:1.7;color:#af9cbe;margin:12px 0 0}footer{font-size:9px;color:#9d8baa;padding:13px 18px;border-top:1px solid #32263e}
 
 [hidden]{display:none!important}.update-notice{margin-top:13px;padding:12px;border:1px solid #8664ac;border-radius:8px;background:linear-gradient(120deg,#372342,#251c33)}.update-notice strong{font-size:12px;color:#f4defe}.update-notice p{font-size:10px;line-height:1.6;color:#d2bedf;margin:6px 0 9px}.update-notice a{font-size:11px;font-weight:650;color:#eac8ff}.release-section{margin-top:17px;padding-top:14px;border-top:1px solid #34283e}.release-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px;color:#c7b8d5}.release-heading button{font:inherit;color:#d6b7fa;border:0;border-radius:4px;background:none;padding:3px;cursor:pointer}.release-heading button:focus-visible,summary:focus-visible{outline:2px solid #cfb3ff;outline-offset:3px}#update-status{font-size:10px;color:#a99aba;margin:5px 0 10px}summary{cursor:pointer;color:#d9c1ee;font-size:11px}#release-notes{max-height:230px;overflow-y:auto;scrollbar-width:thin;overscroll-behavior:contain}#release-notes section{padding:7px 0;border-bottom:1px solid #312438}#release-notes h2{font-size:11px;margin:6px 0;color:#ddc9ef}#release-notes p{font-size:10px;line-height:1.7;margin:4px 0;color:#b9abc8;white-space:pre-wrap;overflow-wrap:anywhere}#changelog>a{display:inline-block;margin-top:10px;font-size:10px;color:#d5b6f2}
+
+.tiny-icon{display:inline-block;width:1.05em;height:1.05em;flex-shrink:0;vertical-align:-.15em}
+.prose,.answer-text{white-space:normal;overflow-wrap:anywhere;line-height:1.65}
+:is(.prose,.answer-text)>:first-child{margin-top:0}
+:is(.prose,.answer-text)>:last-child{margin-bottom:0}
+:is(.prose,.answer-text) p{margin:.65em 0}
+:is(.prose,.answer-text) strong{font-weight:700;color:inherit}
+:is(.prose,.answer-text) em{font-style:italic}
+:is(.prose,.answer-text) :is(ul,ol){padding-left:1.6em;margin:.7em 0}
+:is(.prose,.answer-text) li{margin:.3em 0}
+:is(.prose,.answer-text) li>p{margin:.25em 0}
+:is(.prose,.answer-text) :is(h1,h2,h3,h4,h5,h6){font-size:1.08em;line-height:1.4;margin:1.1em 0 .4em;color:inherit}
+:is(.prose,.answer-text) code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.9em;background:#ffffff0b;padding:.1em .3em;border-radius:4px;white-space:pre-wrap}
+:is(.prose,.answer-text) pre{max-width:100%;overflow:auto;background:#0003;padding:12px;border-radius:8px}
+:is(.prose,.answer-text) pre code{padding:0;background:none;white-space:pre}
+:is(.prose,.answer-text) blockquote{margin:.8em 0;border-left:3px solid #b8a4ff;padding:0 1em;color:#b8b3c5}
+.markdown-table{max-width:100%;overflow-x:auto;margin:.8em 0}
+.markdown-table table{border-collapse:collapse;width:100%;font-size:.92em}
+.markdown-table :is(th,td){border:1px solid #ffffff20;padding:.5em .7em;text-align:left;min-width:70px}
+.markdown-table th{background:#ffffff08;font-weight:700}
+.markdown-table .align-center{text-align:center}.markdown-table .align-right{text-align:right}
+
+a.open,#update-download,#changelog>a{display:flex;align-items:center;justify-content:center;gap:6px}#release-notes .prose{font-size:11px;line-height:1.65}

@@ -10,7 +10,7 @@
   const updateInfo=()=>({...updates,installed,available:!!updates.latest&&DR.newerVersion(updates.latest.version,installed)});
   async function updateBadge(){
     const info=updateInfo();
-    await api.action?.setBadgeText?.({text:info.available?'↑':''});
+    await api.action?.setBadgeText?.({text:info.available?'NEW':''});
     if(info.available)await api.action?.setBadgeBackgroundColor?.({color:'#8c61c6'});
     await api.action?.setTitle?.({title:info.available?`TinySearch ${info.latest.version} available`:'TinySearch'});
   }

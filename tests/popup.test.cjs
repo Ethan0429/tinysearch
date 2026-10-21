@@ -9,7 +9,7 @@ async function popup({failure=false}={}){
     return {updates:{available:true,latest:{version:'0.1.5',url:'https://github.com/Ethan0429/tinysearch/releases/tag/v0.1.5'},releases:[{version:'0.1.5',notes:'<img src=x onerror=alert(1)> Safe notes.'}]}};
   }}};
   w.fetch=async()=>({json:async()=>({releases:[{version:'0.1.4',notes:'Bundled notes remain available offline.'}]})});
-  w.eval(read('popup.js'));await new Promise(setImmediate);return w;
+  w.eval(read('icons.js'));w.eval(read('vendor/markdown-it.min.js'));w.eval(read('markdown.js'));w.eval(read('popup.js'));await new Promise(setImmediate);return w;
 }
 test('popup announces newer releases and renders remote notes as inert text',async()=>{
   const w=await popup();assert.equal(w.document.querySelector('#update-notice').hidden,false);
