@@ -16,7 +16,7 @@ test('release feed accepts only project release URLs and displays notes as data'
 test('concurrent update checks share a fixed-host request, then throttle persistently',async()=>{
   const bg=background({updates:{version:1,releases:[],latest:null,nextCheck:0},responses:[new Response(JSON.stringify(feed()))]});
   const results=await Promise.all([bg.send({type:'DR_RELEASES'},popup),bg.send({type:'DR_RELEASES'},popup)]);
-  assert.equal(bg.calls.length,1);assert.equal(bg.calls[0].url,'https://tinysearch-dashboard-production.up.railway.app/v1/extension');
+  assert.equal(bg.calls.length,1);assert.equal(bg.calls[0].url,'https://tinysearch.up.railway.app/v1/extension');
   assert.ok(results[0].updates.available);assert.equal(results[0].updates.installed,'0.1.4');
   assert.equal(bg.calls[0].options.credentials,'omit');assert.equal(bg.calls[0].options.referrerPolicy,'no-referrer');
   assert.equal(bg.calls[0].options.headers,undefined);

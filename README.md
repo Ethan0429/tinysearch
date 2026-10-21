@@ -28,7 +28,7 @@ icon and an **Update** link above DGG chat appear when a newer version is availa
 Open the popup to read **What’s new**, check again, or download the update.
 Replace the loaded extension files and reload the extension to install it.
 
-The [live dashboard](https://tinysearch-dashboard-production.up.railway.app) shows
+The [live dashboard](https://tinysearch.up.railway.app) shows
 questions, answers, latency, and costs.
 
 ## Installation

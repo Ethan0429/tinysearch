@@ -1,6 +1,10 @@
 {
   "releases": [
     {
+      "version": "0.1.7",
+      "notes": "- Updated the dashboard link and extension update checks to tinysearch.up.railway.app."
+    },
+    {
       "version": "0.1.6",
       "notes": "- Replaced popup taglines with settings labels and source-checking guidance.\n- Updated the chat preview with instructions for summaries, history, and sources."
     },
