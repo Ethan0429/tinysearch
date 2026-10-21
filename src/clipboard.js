@@ -1,7 +1,8 @@
 (() => {
   'use strict';
   const DR = globalThis.DR;
-  DR.copyText = answer => {
+  DR.copyText = (answer, {summaryOnly = false} = {}) => {
+    if (summaryOnly) return `@Destiny ${DR.chatSummary(answer)}`;
     const plain = value => value
       .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '$1 ($2)')
       .replace(/^#{1,6}\s+/gm, '')

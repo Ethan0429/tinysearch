@@ -6,6 +6,7 @@ const read=name=>fs.readFileSync(path.join(root,'src',name),'utf8');
 const now=Date.now();
 function answer(letter='a',offset=0,patch={}){
   return {id:letter.repeat(24),kind:'research.answer',question:`Question ${letter}?`,answer_markdown:'**Sourced answer** with [evidence](https://example.org/evidence).',
+    chat_summary:'The claim remains unverified. https://example.org/evidence',
     stream_id:'abcdefghijk',stream_url:'https://www.youtube.com/watch?v=abcdefghijk&t=120s',
     created_at:new Date(now+offset).toISOString(),heard_at:new Date(now+offset-60000).toISOString(),
     sources:[{title:'Evidence',url:'https://example.org/evidence'}],...patch};

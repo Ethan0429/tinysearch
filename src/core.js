@@ -18,6 +18,14 @@
       return /^[\w-]{11}$/.test(id || '') ? id : null;
     } catch { return null; }
   };
+  DR.chatSummary = answer => {
+    const value = answer.chat_summary;
+    const urls = typeof value === 'string' ? value.match(/https?:\/\/[^\s<>]+/g) || [] : [];
+    if (typeof value === 'string' && value.trim() && !/[\r\n]/.test(value) &&
+        ('@Destiny ' + value).length <= 280 && urls.length <= 2 &&
+        urls.every(url => DR.safeURL(url) && answer.sources.some(source => source && DR.safeURL(source.url) === DR.safeURL(url)))) return value.trim();
+    return 'Summary unavailable. Open the full TinySearch answer for details.';
+  };
   DR.normalize = raw => {
     if (!raw || raw.kind !== 'research.answer' || !/^[a-f0-9]{24}$/.test(raw.id || '')) return null;
     if (typeof raw.question !== 'string' || !raw.question.trim() || raw.question.length > 4000) return null;
@@ -26,6 +34,7 @@
     if (![raw.created_at, raw.heard_at].every(t => typeof t === 'string' && Number.isFinite(Date.parse(t)))) return null;
     if (!Array.isArray(raw.sources) || raw.sources.length > 50) return null;
     return { id: raw.id, kind: raw.kind, question: raw.question.trim(), answer_markdown: raw.answer_markdown,
+      chat_summary: DR.chatSummary(raw),
       stream_id: raw.stream_id, stream_url: DR.safeURL(raw.stream_url), created_at: raw.created_at, heard_at: raw.heard_at,
       sources: raw.sources.filter(s => s && DR.safeURL(s.url)).map(s => ({title: String(s.title || new URL(s.url).hostname).slice(0,300), url: DR.safeURL(s.url)})) };
   };

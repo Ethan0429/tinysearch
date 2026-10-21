@@ -1,1 +1,21 @@
-{"answers":[{"id":"111111111111111111111111","kind":"research.answer","question":"What is the difference between correlation and causation?","answer_markdown":"**Correlation** means two variables vary together. **Causation** means changing one produces a change in the other.\n\nAn observed relationship can also arise from a shared cause, chance, or a biased sample. A causal claim needs evidence that rules out plausible alternatives.\n\nThis is a demonstration answer for the local preview.","stream_id":"abcdefghijk","stream_url":"https://www.youtube.com/watch?v=abcdefghijk&t=120s","heard_at":"2026-10-17T12:00:00+00:00","created_at":"2026-10-17T12:01:00+00:00","sources":[{"title":"Correlation and causation · example source","url":"https://en.wikipedia.org/wiki/Correlation_does_not_imply_causation"}]}]}
+{
+  "answers": [
+    {
+      "id": "111111111111111111111111",
+      "kind": "research.answer",
+      "question": "What is the difference between correlation and causation?",
+      "answer_markdown": "**Correlation** means two variables vary together. **Causation** means changing one produces a change in the other.\n\nAn observed relationship can also arise from a shared cause, chance, or a biased sample. A causal claim needs evidence that rules out plausible alternatives.\n\nThis is a demonstration answer for the local preview.",
+      "stream_id": "abcdefghijk",
+      "stream_url": "https://www.youtube.com/watch?v=abcdefghijk&t=120s",
+      "heard_at": "2026-10-17T12:00:00+00:00",
+      "created_at": "2026-10-17T12:01:00+00:00",
+      "sources": [
+        {
+          "title": "Correlation and causation \u00b7 example source",
+          "url": "https://en.wikipedia.org/wiki/Correlation_does_not_imply_causation"
+        }
+      ],
+      "chat_summary": "Correlation means two things vary together; causation means one changes the other. Correlation alone cannot establish causation. https://en.wikipedia.org/wiki/Correlation_does_not_imply_causation"
+    }
+  ]
+}

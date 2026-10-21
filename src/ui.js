@@ -19,19 +19,19 @@
     for(const d of paths){const path=document.createElementNS(node.namespaceURI,'path');path.setAttribute('d',d);node.append(path);}
     return node;
   }
-  function copyButton(answer) {
+  function copyButton(answer, summaryOnly = false) {
     const control = el('button','copy-button');
     control.type = 'button';
     const feedback = el('span','sr-only');feedback.setAttribute('role','status');
     const reset = () => {
-      control.title = 'Copy answer for chat';control.setAttribute('aria-label',control.title);
+      control.title = summaryOnly ? 'Copy summary for chat' : 'Copy full answer';control.setAttribute('aria-label',control.title);
       control.replaceChildren(icon('clipboard'),feedback);feedback.textContent='';
     };
     reset();
     control.addEventListener('click',async()=>{
       control.disabled=true;control.setAttribute('aria-busy','true');
       try{
-        await DR.writeClipboard(DR.copyText(answer));
+        await DR.writeClipboard(DR.copyText(answer, {summaryOnly}));
         control.replaceChildren(icon('check'),feedback);
         control.title='Copied for chat';control.setAttribute('aria-label','Copied');
         feedback.textContent='Copied for chat';
@@ -79,6 +79,29 @@
     const style = el('style'); style.textContent = DR.styles; root.append(style); return root;
   }
   DR.card = (answer, {compact = true, archive = false, onBrowse = () => {}} = {}) => {
+    if (!archive) {
+      const article = el('article', `card inline-summary${compact ? ' compact' : ''}`);
+      article.setAttribute('aria-label', `TinySearch: ${answer.question}`);
+      const head = el('header', 'byline');
+      const avatar = el('span', 'avatar'); avatar.append(icon('search'));
+      head.append(avatar, el('strong', 'bot-name', 'TinySearch'), el('span', 'bot-tag', 'BOT'), copyButton(answer, true));
+      const prose = el('p', 'chat-summary');
+      const summary = DR.chatSummary(answer);
+      let offset = 0, citation = 0;
+      for (const match of summary.matchAll(/https?:\/\/[^\s<>]+/g)) {
+        prose.append(document.createTextNode(summary.slice(offset, match.index)));
+        const source = answer.sources.find(s => DR.safeURL(s.url) === DR.safeURL(match[0]));
+        const anchor = link(`[${++citation}]`, match[0], 'summary-source');
+        anchor.title = source?.title || match[0];
+        anchor.setAttribute('aria-label', `Source ${citation}: ${anchor.title}`);
+        prose.append(anchor); offset = match.index + match[0].length;
+      }
+      prose.append(document.createTextNode(summary.slice(offset)));
+      const footer = el('footer', 'card-actions');
+      const time = el('time', '', stamp(answer.created_at)); time.dateTime = answer.created_at;
+      footer.append(button('Full answer ↗', 'Read the full answer in TinySearch', () => onBrowse(answer.id), 'text-button'), time);
+      article.append(head, prose, footer); return article;
+    }
     const article = el('article', `card${compact ? ' compact' : ''}`);
     article.setAttribute('aria-label', `TinySearch: ${answer.question}`);
     const head = el('header', 'byline');
@@ -100,17 +123,9 @@
     }
     content.append(sources);
     const footer = el('footer', 'card-actions');
-    const more = button(compact ? 'Read answer' : 'Collapse', 'Expand or collapse this answer', () => {
-      article.classList.toggle('compact');
-      const collapsed = article.classList.contains('compact');
-      more.textContent = collapsed ? 'Read answer' : 'Collapse'; more.setAttribute('aria-expanded', String(!collapsed));
-    }, 'text-button');
-    more.setAttribute('aria-expanded', String(!compact));
     const watch = link('Watch moment ↗', answer.stream_url, 'watch');
     watch.title = 'Open the stream at the time this question was heard';
-    if (!archive) footer.append(more);
     footer.append(watch);
-    if (!archive) footer.append(button('History', 'Find this answer in TinySearch history', () => onBrowse(answer.id), 'text-button muted'));
     article.append(head, meta, title, content, footer, el('p','disclaimer','AI answer · check the sources'));
     return article;
   };
@@ -236,6 +251,7 @@
       const host=el('div');host.dataset.drAnswer=answer.id;host.style.cssText='display:block;margin:8px 7px;clear:both;';
       const root=shadow(host);
       root.append(DR.card(answer,{compact:this.preferences.compact,onBrowse:id=>{this.selected=id;this.toggle(true);}}));
+      host.drSignature=JSON.stringify(answer);
       const atBottom=this.lines.scrollHeight-this.lines.clientHeight-this.lines.scrollTop<64;
       this.lines.append(host);
       if(atBottom)this.lines.scrollTop=this.lines.scrollHeight;
@@ -252,6 +268,13 @@
         const incoming=DR.merge([],snapshot.answers,this.now());
         this.preferences={...DR.DEFAULTS,...snapshot.preferences};this.lastSuccess=snapshot.lastSuccess;this.error=snapshot.error;
         for(const answer of incoming){
+          const existing=this.live.get(answer.id);
+          if(existing && existing.drSignature!==JSON.stringify(answer)){
+            existing.shadowRoot.querySelector('article').replaceWith(DR.card(answer,{
+              compact:this.preferences.compact,onBrowse:id=>{this.selected=id;this.toggle(true);}
+            }));
+            existing.drSignature=JSON.stringify(answer);
+          }
           if(DR.shouldInline(answer,{streamID:this.context(),startedAt:this.startedAt,seen:this.seen,now:this.now()})){
             if(this.preferences.enabled&&this.preferences.inline)this.insert(answer);
             if(!previous.has(answer.id)&&!this.open)this.unread++;
