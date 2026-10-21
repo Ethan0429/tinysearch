@@ -19,10 +19,10 @@ async function ui(){
   window.eval(read('core.js'));window.eval(read('clipboard.js'));window.DR.styles=read('ui.css');window.eval(read('ui.js'));
   return window;
 }
-function background({responses=[],feed,preferences,fetcher}={}){
+function background({responses=[],feed,preferences,fetcher,updates,installed="0.1.4"}={}){
   let clock=now,calls=[];
-  const stored={feed,preferences};let listener;
-  const api={runtime:{id:'test-extension',onMessage:{addListener(fn){listener=fn;}}},storage:{local:{
+  const stored={feed,preferences,updates:updates||{version:1,releases:[],latest:null,nextCheck:now+3600000,checkedAt:now}};let listener;
+  const api={runtime:{id:'test-extension',getManifest:()=>({version:installed}),onMessage:{addListener(fn){listener=fn;}}},storage:{local:{
     async get(){return structuredClone(stored);},async set(data){Object.assign(stored,structuredClone(data));}
   }}};
   class Clock extends Date{static now(){return clock;}}

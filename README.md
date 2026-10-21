@@ -21,6 +21,16 @@ original stream moment in the history panel.
 Earlier answers stay in history when you open a tab. New answers appear alongside
 the conversation. Full answers link to their original stream and all sources.
 
+## Updates and changelog
+
+TinySearch checks for new releases automatically. An arrow badge on the extension
+icon and an **Update** link above DGG chat appear when a newer version is available.
+Open the popup to read **What’s new**, check again, or download the update.
+Replace the loaded extension files and reload the extension to install it.
+
+The [live dashboard](https://tinysearch-dashboard-production.up.railway.app) shows
+questions, answers, latency, and costs.
+
 ## Installation
 
 Download and extract the browser ZIP from [Releases](https://github.com/Ethan0429/tinysearch/releases/latest).

@@ -11,3 +11,4 @@ button,input,a{-webkit-tap-highlight-color:transparent}button,input{font:inherit
 
 .inline-summary{padding:9px 10px 7px}.inline-summary .chat-summary{font-size:12px;line-height:1.55;white-space:normal;margin:8px 0 0;overflow:visible;display:block;max-height:none;-webkit-line-clamp:unset;overflow-wrap:anywhere}.inline-summary .card-actions{margin-top:6px;padding-top:4px}.inline-summary .card-actions time{font-size:9px;color:var(--muted);margin-left:auto}.summary-source{white-space:nowrap;font-weight:650}
 .inline-summary:not(.compact){padding:12px 14px 10px}
+.update-link{font-size:9px;white-space:nowrap;font-weight:650;padding:3px 6px;border:1px solid #7c5d9e;border-radius:4px;background:#bb92ee14;color:#ddc1ff}.toolbar:has(.update-link:not([hidden])) .toolbar-status{display:none}

@@ -3,7 +3,7 @@ const {root}=require('./helpers.cjs');
 test('both release manifests use minimal permissions and the correct MV3 background',()=>{
   for(const browser of ['chrome','firefox']){
     const dir=path.join(root,'dist',browser);const manifest=JSON.parse(fs.readFileSync(path.join(dir,'manifest.json')));
-    assert.equal(manifest.manifest_version,3);assert.equal(manifest.name,'TinySearch');assert.equal(manifest.action.default_title,'TinySearch');assert.deepEqual(manifest.permissions,['storage','clipboardWrite']);assert.equal(manifest.host_permissions.length,1);
+    assert.equal(manifest.manifest_version,3);assert.equal(manifest.name,'TinySearch');assert.equal(manifest.action.default_title,'TinySearch');assert.deepEqual(manifest.permissions,['storage','clipboardWrite']);assert.equal(manifest.host_permissions.length,2);
     assert.equal(manifest.externally_connectable,undefined);assert.equal(manifest.web_accessible_resources,undefined);
     assert.ok(manifest.content_scripts[0].all_frames);assert.ok(manifest.content_scripts[0].matches.every(s=>s.includes('destiny.gg/embed/chat')));
     assert.equal(browser==='chrome'?manifest.background.service_worker:manifest.background.scripts[0],'background.js');

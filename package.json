@@ -1,6 +1,6 @@
 {
   "name": "tinysearch",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": true,
   "description": "Sourced stream answers inside DGG chat, with searchable history.",
   "scripts": {

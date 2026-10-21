@@ -157,7 +157,9 @@
       this.prev = button('‹', 'Previous answer', () => this.step(-1), 'icon-button');
       this.next = button('›', 'Next answer', () => this.step(1), 'icon-button');
       nav.append(this.prev, this.next, button('☷','Search TinySearch history', () => {this.toggle(true);this.search.focus();}, 'icon-button'));
-      toolbar.append(this.browse,this.status,nav);
+      this.updateLink=link('Update ↗',DR.REPOSITORY+'/releases','update-link');
+      this.updateLink.hidden=true;this.updateLink.title='A TinySearch extension update is available';
+      toolbar.append(this.browse,this.status,this.updateLink,nav);
       this.drawer = el('section','drawer'); this.drawer.hidden = true; this.drawer.setAttribute('aria-label','Answer history');
       const heading = el('div','drawer-heading');
       const name = el('div'); name.append(el('span','eyebrow','TINYSEARCH'),el('h2','','Answer history'));
@@ -221,6 +223,11 @@
       this.prev.disabled=this.next.disabled=!this.answers.length;
       this.streamFilter.disabled=!this.context();
       this.streamFilter.title=this.context()?'Filter to the embedded YouTube video':'Available when a YouTube stream is embedded';
+      this.updateLink.hidden=!this.updates?.available;
+      if(this.updates?.available && this.updates.latest?.url===DR.REPOSITORY+'/releases/tag/v'+this.updates.latest.version){
+        this.updateLink.href=this.updates.latest.url;
+        this.updateLink.title=`TinySearch ${this.updates.latest.version} is available. View changes and download.`;
+      }
       this.position();
     }
     renderHistory() {
@@ -266,7 +273,7 @@
         if(!Array.isArray(snapshot.answers))throw new Error('No feed');
         const previous=new Set(this.answers.map(a=>a.id));
         const incoming=DR.merge([],snapshot.answers,this.now());
-        this.preferences={...DR.DEFAULTS,...snapshot.preferences};this.lastSuccess=snapshot.lastSuccess;this.error=snapshot.error;
+        this.preferences={...DR.DEFAULTS,...snapshot.preferences};this.lastSuccess=snapshot.lastSuccess;this.error=snapshot.error;this.updates=snapshot.updates;
         for(const answer of incoming){
           const existing=this.live.get(answer.id);
           if(existing && existing.drSignature!==JSON.stringify(answer)){
