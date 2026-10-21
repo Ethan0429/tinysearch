@@ -30,3 +30,13 @@ test('runtime rejects arbitrary sites and foreign extension identities',()=>{
   assert.equal(DR.allowedSender({id,url:'https://www.destiny.gg/embed/chat?follow=x'},id),true);
   for(const sender of [{id:'other',url:'https://www.destiny.gg/embed/chat'},{id,url:'https://evil.example/'},{id,url:'https://www.destiny.gg/profile'},{id,url:'https://www.destiny.gg/embed/chat-evil'}])assert.equal(DR.allowedSender(sender,id),false);
 });
+
+test('chat summary enforces literal length, existing sources and at most two links',()=>{
+  const DR=core();assert.equal(DR.normalize(answer()).chat_summary,answer().chat_summary);
+  for(const chat_summary of ['x'.repeat(272),'😀'.repeat(136),'https://invented.example','https://example.org/evidence '.repeat(3),'bad\nline']){
+    const item=DR.normalize(answer('a',0,{chat_summary}));
+    assert.match(item.chat_summary,/Summary unavailable/);
+    assert.equal(item.answer_markdown,answer().answer_markdown);
+  }
+  assert.equal(DR.normalize(answer('a',0,{chat_summary:'x'.repeat(271)})).chat_summary.length,271);
+});

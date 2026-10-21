@@ -14,4 +14,4 @@ http.createServer(async(req,res)=>{
     const content=await readFile(path.join(root,route));
     res.writeHead(200,{'Content-Type':route.endsWith('.png')?'image/png':route.endsWith('.html')?'text/html; charset=utf-8':route.endsWith('.js')?'text/javascript; charset=utf-8':route.endsWith('.css')?'text/css; charset=utf-8':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(content);
   }catch{res.writeHead(500);res.end('Preview unavailable');}
-}).listen(8792,'127.0.0.1',()=>console.log('TinySearch preview: http://localhost:8792 (fixture chat; real public research feed)'));
+}).listen(Number(process.env.PORT || 8792),'127.0.0.1',()=>console.log(`TinySearch preview: http://localhost:${process.env.PORT || 8792} (fixture chat; real public research feed)`));

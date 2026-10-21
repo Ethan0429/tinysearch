@@ -3,21 +3,23 @@
 Chrome and Firefox extension that brings sourced research answers into
 [DGG bigscreen](https://www.destiny.gg/bigscreen) chat.
 
-Research appears as **TinySearch** messages. Expand an answer to read
-the details, follow its sources, or jump to the moment it was asked on stream.
+Research appears as short **TinySearch** summaries, shown in full with up to two
+source links. Choose **Full answer** to read the details, all sources, and the
+original stream moment in the history panel.
 
 ## Using the extension
 
 - Open **TinySearch** above chat to search previous questions and answers.
 - Use **Older / Newer** or the toolbar arrows to browse answers.
-- Click the clipboard button on a message to copy it with an `@Destiny ` prefix,
-  ready to paste into chat yourself.
+- Click the clipboard button in chat to copy the summary with an `@Destiny `
+  prefix, ready to paste yourself. The copied post fits within 280 characters,
+  including the prefix and URLs. The detail panel copies the full answer.
 - Use **This stream** to filter history when watching a YouTube stream.
 - Use the extension popup to enable research, show or hide messages in chat,
-  and choose compact or expanded cards.
+  and choose card spacing.
 
 Earlier answers stay in history when you open a tab. New answers appear alongside
-the conversation. Each card links to its original stream and sources.
+the conversation. Full answers link to their original stream and all sources.
 
 ## Installation
 
