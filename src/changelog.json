@@ -1,6 +1,10 @@
 {
   "releases": [
     {
+      "version": "0.1.6",
+      "notes": "- Replaced popup taglines with settings labels and source-checking guidance.\n- Updated the chat preview with instructions for summaries, history, and sources."
+    },
+    {
       "version": "0.1.5",
       "notes": "- Lucide SVG icons throughout the interface.\n- Improved answer formatting for emphasis, lists, code, quotes and tables.\n- Chat summaries allow 280 characters of prose, with mentions and up to two source links counted separately."
     },
@@ -14,7 +18,7 @@
     },
     {
       "version": "0.1.2",
-      "notes": "- TinySearch for Chrome and Firefox.\n- Sourced answers alongside DGG chat, with searchable history and stream timestamps."
+      "notes": "- TinySearch for Chrome and Firefox.\n- Displays research answers in DGG chat, with searchable history and stream timestamps."
     }
   ]
 }
