@@ -11,3 +11,27 @@ button,input,a{-webkit-tap-highlight-color:transparent}button,input{font:inherit
 
 .inline-summary{padding:9px 10px 7px}.inline-summary .chat-summary{font-size:12px;line-height:1.55;white-space:normal;margin:8px 0 0;overflow:visible;display:block;max-height:none;-webkit-line-clamp:unset;overflow-wrap:anywhere}.inline-summary .card-actions{margin-top:6px;padding-top:4px}.inline-summary .card-actions time{font-size:9px;color:var(--muted);margin-left:auto}.summary-source{white-space:nowrap;font-weight:650}
 .inline-summary:not(.compact){padding:12px 14px 10px}
+.update-link{font-size:9px;white-space:nowrap;font-weight:650;padding:3px 6px;border:1px solid #7c5d9e;border-radius:4px;background:#bb92ee14;color:#ddc1ff}.toolbar:has(.update-link:not([hidden])) .toolbar-status{display:none}
+
+.tiny-icon{display:inline-block;width:1.05em;height:1.05em;flex-shrink:0;vertical-align:-.15em}
+.prose,.answer-text{white-space:normal;overflow-wrap:anywhere;line-height:1.65}
+:is(.prose,.answer-text)>:first-child{margin-top:0}
+:is(.prose,.answer-text)>:last-child{margin-bottom:0}
+:is(.prose,.answer-text) p{margin:.65em 0}
+:is(.prose,.answer-text) strong{font-weight:700;color:inherit}
+:is(.prose,.answer-text) em{font-style:italic}
+:is(.prose,.answer-text) :is(ul,ol){padding-left:1.6em;margin:.7em 0}
+:is(.prose,.answer-text) li{margin:.3em 0}
+:is(.prose,.answer-text) li>p{margin:.25em 0}
+:is(.prose,.answer-text) :is(h1,h2,h3,h4,h5,h6){font-size:1.08em;line-height:1.4;margin:1.1em 0 .4em;color:inherit}
+:is(.prose,.answer-text) code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.9em;background:#ffffff0b;padding:.1em .3em;border-radius:4px;white-space:pre-wrap}
+:is(.prose,.answer-text) pre{max-width:100%;overflow:auto;background:#0003;padding:12px;border-radius:8px}
+:is(.prose,.answer-text) pre code{padding:0;background:none;white-space:pre}
+:is(.prose,.answer-text) blockquote{margin:.8em 0;border-left:3px solid #b8a4ff;padding:0 1em;color:#b8b3c5}
+.markdown-table{max-width:100%;overflow-x:auto;margin:.8em 0}
+.markdown-table table{border-collapse:collapse;width:100%;font-size:.92em}
+.markdown-table :is(th,td){border:1px solid #ffffff20;padding:.5em .7em;text-align:left;min-width:70px}
+.markdown-table th{background:#ffffff08;font-weight:700}
+.markdown-table .align-center{text-align:center}.markdown-table .align-right{text-align:right}
+
+.text-button,.watch,.update-link{display:inline-flex;align-items:center;gap:5px}.icon-button .tiny-icon{width:17px;height:17px}

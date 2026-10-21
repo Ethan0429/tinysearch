@@ -16,13 +16,13 @@ async function ui(){
   const {Window}=await import('happy-dom');
   const window=new Window({url:'https://www.destiny.gg/embed/chat?follow=%2Fbigscreen'});
   window.document.body.innerHTML='<div id="chat"><div id="chat-output-frame"><div id="chat-win-main"><div class="chat-lines"><div class="msg-chat">Native chat</div></div></div></div><div id="chat-input-frame"><textarea></textarea></div></div>';
-  window.eval(read('core.js'));window.eval(read('clipboard.js'));window.DR.styles=read('ui.css');window.eval(read('ui.js'));
+  window.eval(read('core.js'));window.eval(read('clipboard.js'));window.DR.styles=read('ui.css');window.eval(read('vendor/markdown-it.min.js'));window.eval(read('markdown.js'));window.eval(read('icons.js'));window.eval(read('ui.js'));
   return window;
 }
-function background({responses=[],feed,preferences,fetcher}={}){
+function background({responses=[],feed,preferences,fetcher,updates,installed="0.1.4"}={}){
   let clock=now,calls=[];
-  const stored={feed,preferences};let listener;
-  const api={runtime:{id:'test-extension',onMessage:{addListener(fn){listener=fn;}}},storage:{local:{
+  const stored={feed,preferences,updates:updates||{version:1,releases:[],latest:null,nextCheck:now+3600000,checkedAt:now}};let listener;
+  const api={runtime:{id:'test-extension',getManifest:()=>({version:installed}),onMessage:{addListener(fn){listener=fn;}}},storage:{local:{
     async get(){return structuredClone(stored);},async set(data){Object.assign(stored,structuredClone(data));}
   }}};
   class Clock extends Date{static now(){return clock;}}

@@ -1,0 +1,24 @@
+{
+  "releases": [
+    {
+      "version": "0.1.6",
+      "notes": "- Replaced popup taglines with settings labels and source-checking guidance.\n- Updated the chat preview with instructions for summaries, history, and sources."
+    },
+    {
+      "version": "0.1.5",
+      "notes": "- Lucide SVG icons throughout the interface.\n- Improved answer formatting for emphasis, lists, code, quotes and tables.\n- Chat summaries allow 280 characters of prose, with mentions and up to two source links counted separately."
+    },
+    {
+      "version": "0.1.4",
+      "notes": "- Update notices in the popup, browser toolbar badge, and DGG chat toolbar.\n- Read release notes and check for updates from the popup.\n- The public live dashboard is available on Railway."
+    },
+    {
+      "version": "0.1.3",
+      "notes": "- Chat cards show complete short summaries with up to two sources.\n- Chat copy includes @Destiny and fits within 280 characters.\n- Full answers remain available in the detail panel."
+    },
+    {
+      "version": "0.1.2",
+      "notes": "- TinySearch for Chrome and Firefox.\n- Displays research answers in DGG chat, with searchable history and stream timestamps."
+    }
+  ]
+}
