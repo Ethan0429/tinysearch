@@ -9,8 +9,10 @@
       const parent = window.top;
       const hash = parent.location.hash.match(/^#youtube\/([\w-]{11})(?:$|[?&/])/i);
       if (hash) return hash[1];
+      const kick = parent.location.hash.match(/^#kick\/([\w-]{1,25})(?:$|[?&/])/i);
+      if (kick) return 'kick:'+kick[1].toLowerCase();
       for (const iframe of parent.document.querySelectorAll('iframe[src]')) {
-        const id = DR.videoID(iframe.src); if (id) return id;
+        const id = DR.videoID(iframe.src) || DR.kickChannel(iframe.src); if (id) return id;
       }
     } catch { /* Popout/cross-origin pages still get unfiltered recent research. */ }
     return null;

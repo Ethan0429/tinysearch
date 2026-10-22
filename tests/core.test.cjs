@@ -45,3 +45,14 @@ test('280 prose characters exclude mention and both known source URLs',()=>{
   const DR=core();const a=answer();a.chat_summary='x'.repeat(280)+' '+a.sources[0].url;
   assert.equal(DR.chatSummary(a),a.chat_summary);
 });
+
+test('Kick answers retain channel and broadcast identity and reject forged or seekable URLs',()=>{
+ const DR=core();const raw=answer('a',0,{stream_id:'kick:anythingelse:broadcast-one',stream_url:'https://kick.com/anythingelse',source_id:'kick:anythingelse',source_name:'Anything Else'});
+ const result=DR.normalize(raw);assert.ok(result);assert.equal(result.platform,'kick');assert.equal(result.source_id,'kick:anythingelse');
+ assert.equal(DR.kickChannel('https://player.kick.com/anythingelse?autoplay=true'),'kick:anythingelse');
+ for(const patch of [{source_id:'kick:other'},{stream_id:'kick:other:one'},{stream_url:'https://kick.com/anythingelse?t=60'},{stream_url:'https://kick.com.evil.test/anythingelse'},{stream_url:'https://user:pass@kick.com/anythingelse'},{stream_url:'https://player.kick.com/anythingelse'}]) assert.equal(DR.normalize({...raw,...patch}),null);
+ const context={startedAt:now,streamID:'kick:anythingelse',seen:new Set(),now};
+ assert.equal(DR.shouldInline(result,context),true);assert.equal(DR.shouldInline(answer(),context),false);
+ assert.equal(DR.shouldInline(result,{...context,streamID:'kick:other'}),false);
+ assert.equal(DR.shouldInline(result,{...context,streamID:'abcdefghijk'}),false);
+});

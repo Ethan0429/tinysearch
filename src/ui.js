@@ -96,8 +96,8 @@
     }
     content.append(sources);
     const footer = el('footer', 'card-actions');
-    const watch = link('Watch moment', answer.stream_url, 'watch', 'arrow-up-right');
-    watch.title = 'Open the stream at the time this question was heard';
+    const watch = link(answer.platform === 'kick' ? 'Open Kick channel' : 'Watch moment', answer.stream_url, 'watch', 'arrow-up-right');
+    watch.title = answer.platform === 'kick' ? 'Open this Kick channel' : 'Open the stream at the time this question was heard';
     footer.append(watch);
     article.append(head, meta, title, content, footer, el('p','disclaimer','AI answer · check the sources'));
     return article;
@@ -142,7 +142,7 @@
       this.search.addEventListener('input',()=>{this.query=this.search.value;this.renderHistory();});
       const filters = el('div','filters');
       this.allFilter = button('All answers','Show all recent answers',()=>this.setScope('all'),'filter active');
-      this.streamFilter = button('This stream','Show answers for this YouTube stream',()=>this.setScope('stream'),'filter');
+      this.streamFilter = button('This stream','Show answers for the embedded stream',()=>this.setScope('stream'),'filter');
       filters.append(this.allFilter,this.streamFilter);
       this.results = el('div','results');this.results.setAttribute('aria-label','Questions');
       this.reader = el('div','reader');
@@ -168,7 +168,7 @@
       const bottom = this.input?.getBoundingClientRect().top;
       this.host.style.setProperty('--panel-bottom', `${bottom ? Math.max(0,window.innerHeight-bottom) : 8}px`);
     }
-    visible() { return [...this.answers].reverse().filter(a=>DR.matches(a,this.query) && (this.scope!=='stream'||a.stream_id===this.context())); }
+    visible() { return [...this.answers].reverse().filter(a=>DR.matches(a,this.query) && (this.scope!=='stream'||DR.matchesStream(a,this.context()))); }
     setScope(scope) { this.scope = scope; this.renderHistory(); }
     toggle(value) {
       this.open = value === undefined ? !this.open : value;
@@ -195,7 +195,7 @@
       this.status.title=this.lastSuccess?`Public feed checked ${stamp(this.lastSuccess)}`:'Waiting for the public relay';
       this.prev.disabled=this.next.disabled=!this.answers.length;
       this.streamFilter.disabled=!this.context();
-      this.streamFilter.title=this.context()?'Filter to the embedded YouTube video':'Available when a YouTube stream is embedded';
+      this.streamFilter.title=this.context()?'Filter to the embedded channel or video':'Available when a supported stream is embedded';
       this.updateLink.hidden=!this.updates?.available;
       if(this.updates?.available && this.updates.latest?.url===DR.REPOSITORY+'/releases/tag/v'+this.updates.latest.version){
         this.updateLink.href=this.updates.latest.url;
@@ -211,7 +211,7 @@
       entries.forEach(answer=>{
         const item=button('',answer.question,()=>{this.selected=answer.id;this.renderHistory();this.reader.scrollTop=0;},'result'+(answer.id===this.selected?' selected':''));
         item.setAttribute('aria-pressed',String(answer.id===this.selected));
-        item.append(el('span','result-question',answer.question),el('span','result-time',stamp(answer.created_at)));
+        item.append(el('span','result-question',answer.question),el('span','result-time',(answer.source_name ? answer.source_name+' · ' : '')+stamp(answer.created_at)));
         fragment.append(item);
       });
       if(!entries.length)fragment.append(el('p','empty',this.query?'Try another search to find an answer.':this.scope==='stream'?'Answers for this stream will appear here.':'TinySearch answers will appear here during the stream.'));
@@ -262,7 +262,10 @@
           this.seen.add(answer.id);
         }
         this.answers=incoming;
-        for(const [id,node]of this.live){node.hidden=!this.preferences.enabled||!this.preferences.inline;}
+        for(const [id,node]of this.live){
+          const answer=incoming.find(answer=>answer.id===id);
+          node.hidden=!this.preferences.enabled||!this.preferences.inline||!answer||!DR.matchesStream(answer,this.context());
+        }
         this.refreshBar();if(this.open)this.renderHistory();
       } catch {this.error='Reconnecting';this.refreshBar();}
       finally{this.busy=false;}

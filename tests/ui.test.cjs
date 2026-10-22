@@ -66,3 +66,28 @@ test('edited feed summaries refresh inline in place without duplicate cards',asy
   assert.equal(host.shadowRoot.querySelector('.chat-summary').textContent,'A revised concise answer.');
   app.destroy();await w.happyDOM.abort();
 });
+
+test('Kick detail cards open the channel without a Watch moment control and DGG filters inline by channel',async()=>{
+ const w=await ui();
+ const kick=w.DR.normalize(answer('b',0,{stream_id:'kick:anythingelse:one',stream_url:'https://kick.com/anythingelse',source_name:'Anything Else'}));
+ const card=w.DR.card(kick,{archive:true});assert.ok(card.textContent.includes('Open Kick channel'));assert.ok(!card.textContent.includes('Watch moment'));
+ assert.equal(card.querySelector('.watch').href,'https://kick.com/anythingelse');
+ const app=new w.DR.ChatApp({transport:async()=>snapshot([answer(),kick]),context:()=> 'kick:anythingelse',now:()=>now});await app.tick();
+ assert.equal(w.document.querySelectorAll('[data-dr-answer]').length,1);
+ assert.equal(w.document.querySelector('[data-dr-answer]').getAttribute('data-dr-answer'),kick.id);
+ app.destroy();await w.happyDOM.abort();
+});
+
+test('the actual DGG content script detects Kick hashes and player embeds as well as YouTube',()=>{
+ const {read,core}=require('./helpers.cjs');const vm=require('node:vm');let captured;
+ const parent={location:{hash:'#kick/anythingelse'},document:{querySelectorAll:()=>[]}};
+ const DR=core();DR.ChatApp=class{constructor(options){captured=options.context;}async tick(){}mount(){}destroy(){}};
+ const sandbox=vm.createContext({DR,location:{pathname:'/embed/chat'},window:{top:parent,addEventListener(){}},chrome:{runtime:{}},document:{documentElement:{}},MutationObserver:class{observe(){}disconnect(){}},setTimeout(){return 0;},clearTimeout(){},queueMicrotask(){}});
+ vm.runInContext(read('content.js'),sandbox);
+ assert.equal(captured(),'kick:anythingelse');
+ parent.location.hash='#youtube/abcdefghijk';assert.equal(captured(),'abcdefghijk');
+ parent.location.hash='';parent.document.querySelectorAll=()=>[{src:'https://player.kick.com/anythingelse?autoplay=true'}];
+ assert.equal(captured(),'kick:anythingelse');
+ parent.document.querySelectorAll=()=>[{src:'https://www.youtube.com/embed/abcdefghijk'}];
+ assert.equal(captured(),'abcdefghijk');
+});

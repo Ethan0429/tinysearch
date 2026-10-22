@@ -20,6 +20,15 @@
       return /^[\w-]{11}$/.test(id || '') ? id : null;
     } catch { return null; }
   };
+  DR.kickChannel = value => {
+    try {
+      const url = new URL(value);
+      if (url.protocol !== 'https:' || url.username || url.password || url.port || !['kick.com','www.kick.com','player.kick.com'].includes(url.hostname)) return null;
+      const slug=url.pathname.match(/^\/([\w-]{1,25})\/?$/)?.[1]?.toLowerCase();
+      return slug && !['video','videos','categories','search','auth'].includes(slug) ? 'kick:'+slug : null;
+    } catch {return null;}
+  };
+  DR.matchesStream = (answer, context) => !context || (context.startsWith('kick:') ? answer.source_id === context : answer.stream_id === context);
   DR.chatSummary = answer => {
     const value = answer.chat_summary;
     const urls = typeof value === 'string' ? value.match(/https?:\/\/[^\s<>]+/g) || [] : [];
@@ -32,11 +41,19 @@
     if (!raw || raw.kind !== 'research.answer' || !/^[a-f0-9]{24}$/.test(raw.id || '')) return null;
     if (typeof raw.question !== 'string' || !raw.question.trim() || raw.question.length > 4000) return null;
     if (typeof raw.answer_markdown !== 'string' || !raw.answer_markdown.trim() || raw.answer_markdown.length > 30000) return null;
-    if (!/^[\w-]{11}$/.test(raw.stream_id || '') || DR.videoID(raw.stream_url) !== raw.stream_id) return null;
+    const kick = DR.kickChannel(raw.stream_url);
+    const youtube = DR.videoID(raw.stream_url);
+    if (kick) {
+      const url = new URL(raw.stream_url);
+      if (url.hostname !== 'kick.com' || url.search || url.hash) return null;
+      if (!new RegExp('^'+kick+'(?::[\\w-]{1,180})?$').test(raw.stream_id || '') || raw.source_id && raw.source_id !== kick) return null;
+    } else if (!youtube || youtube !== raw.stream_id) return null;
     if (![raw.created_at, raw.heard_at].every(t => typeof t === 'string' && Number.isFinite(Date.parse(t)))) return null;
     if (!Array.isArray(raw.sources) || raw.sources.length > 50) return null;
     return { id: raw.id, kind: raw.kind, question: raw.question.trim(), answer_markdown: raw.answer_markdown,
       chat_summary: DR.chatSummary(raw),
+      source_id: kick || (typeof raw.source_id==='string' && /^youtube:[\w.-]{1,100}$/.test(raw.source_id) ? raw.source_id : 'youtube:destiny'),
+      source_name: typeof raw.source_name==='string' ? raw.source_name.slice(0,80) : kick ? kick.slice(5) : 'Destiny', platform: kick ? 'kick' : 'youtube',
       stream_id: raw.stream_id, stream_url: DR.safeURL(raw.stream_url), created_at: raw.created_at, heard_at: raw.heard_at,
       sources: raw.sources.filter(s => s && DR.safeURL(s.url)).map(s => ({title: String(s.title || new URL(s.url).hostname).slice(0,300), url: DR.safeURL(s.url)})) };
   };
@@ -50,7 +67,7 @@
   };
   DR.matches = (answer, query) => `${answer.question}\n${answer.answer_markdown}\n${answer.sources.map(s=>s.title).join(' ')}`.toLocaleLowerCase().includes(query.toLocaleLowerCase().trim());
   DR.shouldInline = (answer, {streamID, startedAt, seen, now = Date.now()}) => !seen.has(answer.id) &&
-    Date.parse(answer.created_at) >= Math.max(startedAt - 30000, now - 10 * 60000) && (!streamID || answer.stream_id === streamID);
+    Date.parse(answer.created_at) >= Math.max(startedAt - 30000, now - 10 * 60000) && DR.matchesStream(answer, streamID);
   DR.newerVersion = (candidate, installed) => {
     const valid = value => typeof value === 'string' && /^\d{1,5}\.\d{1,5}\.\d{1,5}(?:\.\d{1,5})?$/.test(value);
     if (!valid(candidate) || !valid(installed)) return false;
