@@ -1,6 +1,10 @@
 {
   "releases": [
     {
+      "version": "0.1.10",
+      "notes": "- Moved the public dashboard, answer feed and release notes to tinysearch.app.\n- Service permissions now use a single TinySearch domain."
+    },
+    {
       "version": "0.1.9",
       "notes": "- Chrome installations and update notices use the Chrome Web Store.\n- Chrome confirms available updates directly; GitHub releases awaiting store review do not trigger update notices.\n- Firefox keeps GitHub downloads and release notes."
     },

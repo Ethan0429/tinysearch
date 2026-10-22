@@ -4,7 +4,7 @@ test('one fixed-host request serves simultaneous tabs, then obeys minimum pollin
   const bg=background({responses:[response([answer()])]});
   const snapshots=await Promise.all([bg.send(),bg.send(),bg.send()]);
   assert.equal(bg.calls.length,1);assert.equal(snapshots[0].answers.length,1);await bg.send();assert.equal(bg.calls.length,1);
-  const {url,options}=bg.calls[0];assert.ok(url.startsWith('https://discord-relay-production-861c.up.railway.app/v1/answers'));
+  const {url,options}=bg.calls[0];assert.ok(url.startsWith('https://tinysearch.app/v1/answers'));
   assert.equal(options.credentials,'omit');assert.equal(options.redirect,'error');assert.equal(options.referrerPolicy,'no-referrer');
   assert.equal(options.headers.Authorization,undefined);assert.equal(options.method,'GET');
 });

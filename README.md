@@ -27,7 +27,7 @@ Chrome Web Store installations update through Chrome. The popup can check the st
 
 Firefox checks GitHub releases. Download the Firefox ZIP, replace the loaded extension files, and reload it. Both browsers include **What’s new** in the popup.
 
-The [live dashboard](https://tinysearch.up.railway.app) shows
+The [live dashboard](https://tinysearch.app) shows
 questions, answers, latency, and costs.
 
 ## Installation
