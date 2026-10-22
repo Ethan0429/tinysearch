@@ -13,12 +13,12 @@ const background=[core,await read('background.js')].join('\n');
 const base={manifest_version:3,name:'TinySearch',version:pkg.version,
   description:'Sourced stream answers in DGG chat, with searchable history and stream timestamps.',
   homepage_url:'https://github.com/Ethan0429/tinysearch',
-  permissions:['storage','clipboardWrite'],host_permissions:['https://discord-relay-production-861c.up.railway.app/*','https://tinysearch.up.railway.app/*'],
+  permissions:['storage','clipboardWrite'],host_permissions:['https://tinysearch.app/*'],
   icons:{16:'icons/16.png',32:'icons/32.png',48:'icons/48.png',128:'icons/128.png'},
   action:{default_title:'TinySearch',default_popup:'popup.html',default_icon:{16:'icons/16.png',32:'icons/32.png'}},
   content_scripts:[{matches:['https://www.destiny.gg/embed/chat*','https://destiny.gg/embed/chat*'],
     js:['content.js'],all_frames:true,run_at:'document_idle'}],
-  content_security_policy:{extension_pages:"script-src 'self'; object-src 'none'; connect-src 'self' https://discord-relay-production-861c.up.railway.app https://tinysearch.up.railway.app"}
+  content_security_policy:{extension_pages:"script-src 'self'; object-src 'none'; connect-src 'self' https://tinysearch.app"}
 };
 const files=['manifest.json','content.js','background.js','popup.html','popup.js','popup.css','changelog.json','icons.js','markdown.js','vendor/markdown-it.min.js','vendor/MARKDOWN-IT-LICENSE','vendor/LUCIDE-LICENSE','vendor/README.md',...Object.values(base.icons)];
 const icons=await Promise.all([16,32,48,128].map(async size=>[size,await sharp(path.join(root,'assets','icon.png')).resize(size,size).png().toBuffer()]));
