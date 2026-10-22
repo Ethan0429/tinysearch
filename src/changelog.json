@@ -1,6 +1,10 @@
 {
   "releases": [
     {
+      "version": "0.1.9",
+      "notes": "- Chrome installations and update notices use the Chrome Web Store.\n- Chrome confirms available updates directly; GitHub releases awaiting store review do not trigger update notices.\n- Firefox keeps GitHub downloads and release notes."
+    },
+    {
       "version": "0.1.8",
       "notes": "- Answers from supported Kick channels appear in DGG chat when that channel is embedded.\n- Kick answer details open the channel without seeking controls.\n- YouTube and Kick answers stay associated with their respective channels."
     },

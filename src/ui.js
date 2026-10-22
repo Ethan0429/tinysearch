@@ -196,10 +196,10 @@
       this.prev.disabled=this.next.disabled=!this.answers.length;
       this.streamFilter.disabled=!this.context();
       this.streamFilter.title=this.context()?'Filter to the embedded channel or video':'Available when a supported stream is embedded';
-      this.updateLink.hidden=!this.updates?.available;
-      if(this.updates?.available && this.updates.latest?.url===DR.REPOSITORY+'/releases/tag/v'+this.updates.latest.version){
-        this.updateLink.href=this.updates.latest.url;
-        this.updateLink.title=`TinySearch ${this.updates.latest.version} is available. View changes and download.`;
+      this.updateLink.hidden=true;
+      if(this.updates?.available && this.updates.latest?.url===(this.updates.channel==='chrome'?DR.CHROME_STORE:DR.REPOSITORY+'/releases/tag/v'+this.updates.latest.version)){
+        this.updateLink.hidden=false;this.updateLink.href=this.updates.latest.url;
+        this.updateLink.title=this.updates.channel==='chrome'?`TinySearch ${this.updates.latest.version} is ready. Restart Chrome to finish updating.`:`TinySearch ${this.updates.latest.version} is available. View changes and download.`;
       }
       this.position();
     }

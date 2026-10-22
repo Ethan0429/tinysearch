@@ -19,10 +19,10 @@ async function ui(){
   window.eval(read('core.js'));window.eval(read('clipboard.js'));window.DR.styles=read('ui.css');window.eval(read('vendor/markdown-it.min.js'));window.eval(read('markdown.js'));window.eval(read('icons.js'));window.eval(read('ui.js'));
   return window;
 }
-function background({responses=[],feed,preferences,fetcher,updates,installed="0.1.4"}={}){
-  let clock=now,calls=[];
-  const stored={feed,preferences,updates:updates||{version:1,releases:[],latest:null,nextCheck:now+3600000,checkedAt:now}};let listener;
-  const api={runtime:{id:'test-extension',getManifest:()=>({version:installed}),onMessage:{addListener(fn){listener=fn;}}},storage:{local:{
+function background({responses=[],feed,preferences,fetcher,updates,installed="0.1.4",channel="firefox",managed=true,updateCheck=async()=>({status:"no_update"}),browserUpdate}={}){
+  let clock=now,calls=[],nativeCalls=[],badges=[];let availableListener;
+  const stored={feed,preferences,browserUpdate,updates:updates||{version:1,releases:[],latest:null,nextCheck:now+3600000,checkedAt:now}};let listener;
+  const api={action:{async setBadgeText(value){badges.push(value.text);}},runtime:{id:channel==='chrome'&&managed?'lgonddigopjaghgljjhjokpkpglcaboc':'test-extension',getManifest:()=>({version:installed,...(channel==='firefox'?{browser_specific_settings:{gecko:{id:'test'}}}:{})}),async requestUpdateCheck(){nativeCalls.push(clock);return updateCheck();},onUpdateAvailable:{addListener(fn){availableListener=fn;}},onMessage:{addListener(fn){listener=fn;}}},storage:{local:{
     async get(){return structuredClone(stored);},async set(data){Object.assign(stored,structuredClone(data));}
   }}};
   class Clock extends Date{static now(){return clock;}}
@@ -31,7 +31,7 @@ function background({responses=[],feed,preferences,fetcher,updates,installed="0.
   vm.runInContext(read('core.js')+'\n'+read('background.js'),context);
   const sender={id:api.runtime.id,url:'https://www.destiny.gg/embed/chat?follow=%2Fbigscreen',tab:{id:1}};
   const send=(message={type:'DR_FEED'},from=sender)=>new Promise(resolve=>listener(message,from,resolve));
-  return {send,calls,stored,sender,advance(ms){clock+=ms;},context};
+  return {send,calls,stored,sender,nativeCalls,badges,async emitUpdate(details){return availableListener?.(details);},advance(ms){clock+=ms;},context};
 }
 const response=(answers=[],extra={},status=200)=>new Response(JSON.stringify({version:1,answers,next_cursor:answers.at(-1)?.id||null,has_more:false,...extra}),{status,headers:{etag:'"test"'}});
 module.exports={read,root,now,answer,core,ui,background,response};

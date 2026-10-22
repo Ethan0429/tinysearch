@@ -23,26 +23,22 @@ the conversation. Full answers link to their original stream and all sources.
 
 ## Updates and changelog
 
-TinySearch checks for new releases automatically. A **NEW** badge on the extension
-icon and an **Update** link above DGG chat appear when a newer version is available.
-Open the popup to read **What’s new**, check again, or download the update.
-Replace the loaded extension files and reload the extension to install it.
+Chrome Web Store installations update through Chrome. The popup can check the store on demand. When Chrome reports a downloaded update, TinySearch shows a **NEW** badge and an **Update** link above DGG chat. Restart Chrome to apply a pending update immediately.
+
+Firefox checks GitHub releases. Download the Firefox ZIP, replace the loaded extension files, and reload it. Both browsers include **What’s new** in the popup.
 
 The [live dashboard](https://tinysearch.up.railway.app) shows
 questions, answers, latency, and costs.
 
 ## Installation
 
-Download and extract the browser ZIP from [Releases](https://github.com/Ethan0429/tinysearch/releases/latest).
+### Chrome
 
-### Chrome / Chromium (120+)
-
-1. Open `chrome://extensions` and enable **Developer mode**.
-2. Choose **Load unpacked** and select the extracted Chrome folder containing
-   `manifest.json` (or `dist/chrome` from a local build).
-3. Open or reload bigscreen.
+Install [TinySearch from Chrome Web Store](https://chromewebstore.google.com/detail/tinysearch/lgonddigopjaghgljjhjokpkpglcaboc), then open or reload DGG bigscreen.
 
 ### Firefox (142+)
+
+Download and extract the Firefox ZIP from [Releases](https://github.com/Ethan0429/tinysearch/releases/latest).
 
 1. Open `about:debugging#/runtime/this-firefox`.
 2. Choose **Load Temporary Add-on** and select `manifest.json` in the extracted
@@ -58,7 +54,7 @@ npm ci
 npm run check
 ```
 
-Builds are written to `dist/chrome`, `dist/firefox`, and ZIPs in `artifacts/`.
+Builds are written to `dist/chrome`, `dist/firefox`, and ZIPs in `artifacts/`. For Chrome development, enable Developer mode at `chrome://extensions`, choose **Load unpacked**, and select `dist/chrome`. Reload the unpacked extension after rebuilding.
 
 ```sh
 npm run preview

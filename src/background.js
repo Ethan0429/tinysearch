@@ -2,19 +2,30 @@
   'use strict';
   const api = globalThis.browser || globalThis.chrome;
   const DR = globalThis.DR;
+  const manifest = api.runtime.getManifest();
+  const installed = manifest.version;
+  const chrome = !manifest.browser_specific_settings?.gecko;
+  const managed = chrome && api.runtime.id === DR.CHROME_STORE_ID;
   let state = {answers: [], cursor: null, checkedAt: 0, lastSuccess: 0, nextPoll: 0, failures: 0, etag: null, etagURL: null, error: null};
   let prefs = {...DR.DEFAULTS};
-  let flight, updateFlight;
-  let updates={version:1,releases:[],latest:null,nextCheck:0,checkedAt:0,error:null};
-  const installed=api.runtime.getManifest().version;
-  const updateInfo=()=>({...updates,installed,available:!!updates.latest&&DR.newerVersion(updates.latest.version,installed)});
-  async function updateBadge(){
+  let flight, updateFlight, nativeFlight;
+  let updates = {version:1,releases:[],latest:null,nextCheck:0,checkedAt:0,error:null};
+  let browserUpdate = {installed,status:managed?'automatic':'unpacked',version:null,attemptedAt:0,error:null};
+  function updateInfo() {
+    if (!chrome) return {...updates,installed,channel:'firefox',available:!!updates.latest&&DR.newerVersion(updates.latest.version,installed)};
+    const available = managed && DR.newerVersion(browserUpdate.version,installed);
+    return {...updates,installed,channel:'chrome',managed,available,
+      latest:available?{version:browserUpdate.version,url:DR.CHROME_STORE}:null,
+      releases:updates.releases.filter(release=>!DR.newerVersion(release.version,installed)),
+      storeStatus:browserUpdate.status,error:browserUpdate.error};
+  }
+  async function updateBadge() {
     const info=updateInfo();
     await api.action?.setBadgeText?.({text:info.available?'NEW':''});
     if(info.available)await api.action?.setBadgeBackgroundColor?.({color:'#8c61c6'});
     await api.action?.setTitle?.({title:info.available?`TinySearch ${info.latest.version} available`:'TinySearch'});
   }
-  async function checkUpdates(refresh=false){
+  async function checkReleaseNotes(refresh=false) {
     await loaded;
     if(Date.now()<updates.nextCheck && (!refresh || Date.now()-(updates.attemptedAt||0)<60000))return updateInfo();
     if(!updateFlight)updateFlight=(async()=>{
@@ -31,11 +42,46 @@
     })().finally(()=>{updateFlight=null;});
     return updateFlight;
   }
-  const loaded = api.storage.local.get(['feed', 'preferences', 'updates']).then(data => {
-    if (data.feed) state = {...state, ...data.feed, answers: DR.merge([], data.feed.answers || [])};
-    prefs = {...prefs, ...data.preferences};
+  async function checkChromeUpdate() {
+    if(!managed)return updateInfo();
+    if(nativeFlight)return nativeFlight;
+    if(Date.now()-(browserUpdate.attemptedAt||0)<60000)return updateInfo();
+    nativeFlight=(async()=>{
+      browserUpdate.attemptedAt=Date.now();
+      try{
+        const result=await api.runtime.requestUpdateCheck();
+        if(!['update_available','no_update','throttled'].includes(result?.status))throw new Error('Invalid update result');
+        if(result.status==='update_available'){
+          if(!DR.newerVersion(result.version,installed))throw new Error('Invalid update version');
+          browserUpdate.version=result.version;
+        }else if(result.status==='no_update')browserUpdate.version=null;
+        browserUpdate.status=result.status;
+        browserUpdate.error=null;
+      }catch{browserUpdate.error='Could not check Chrome Web Store. Try again later.';}
+      await api.storage.local.set({browserUpdate});await updateBadge();
+      return updateInfo();
+    })().finally(()=>{nativeFlight=null;});
+    return nativeFlight;
+  }
+  async function checkUpdates(refresh=false) {
+    if(!chrome)return checkReleaseNotes(refresh);
+    await loaded;
+    // GitHub supplies release notes; only Chrome can confirm a published store update.
+    checkReleaseNotes().catch(()=>{});
+    return refresh?checkChromeUpdate():updateInfo();
+  }
+  const loaded=api.storage.local.get(['feed','preferences','updates','browserUpdate']).then(data=>{
+    if(data.feed)state={...state,...data.feed,answers:DR.merge([],data.feed.answers||[])};
+    prefs={...prefs,...data.preferences};
     if(data.updates){try{updates={...updates,...data.updates,...DR.releaseFeed(data.updates)};}catch{}}
+    if(managed&&data.browserUpdate?.installed===installed)browserUpdate={...browserUpdate,...data.browserUpdate};
     updateBadge().catch(()=>{});
+  });
+  if(managed)api.runtime.onUpdateAvailable?.addListener(async details=>{
+    await loaded;
+    if(!DR.newerVersion(details?.version,installed))return;
+    browserUpdate={...browserUpdate,status:'update_available',version:details.version,error:null};
+    await api.storage.local.set({browserUpdate});await updateBadge();
   });
   async function request(path, headers = {}) {
     return fetch(DR.RELAY + path, {method: 'GET', headers, credentials: 'omit', redirect: 'error', referrerPolicy: 'no-referrer', signal: AbortSignal.timeout(12000)});

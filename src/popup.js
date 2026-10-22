@@ -37,11 +37,21 @@
       const result=await api.runtime.sendMessage({type:'DR_RELEASES',refresh});
       if(!result.updates)throw new Error('Unavailable');
       const info=result.updates;
-      document.querySelector('#update-status').textContent=info.error || (info.available?`Version ${info.latest.version} is available.`:'You’re up to date.');
+      const chrome=info.channel==='chrome';
+      const storeURL='https://chromewebstore.google.com/detail/tinysearch/lgonddigopjaghgljjhjokpkpglcaboc';
+      const storeMessages={automatic:'Chrome manages updates automatically.',no_update:'Chrome Web Store reports no update.',throttled:'Chrome checked recently. Try again later.',unpacked:'Install from Chrome Web Store for automatic updates.',update_available:'An update is ready to install.'};
+      document.querySelector('#update-status').textContent=info.error || (chrome?storeMessages[info.storeStatus]||storeMessages.automatic:info.available?`Version ${info.latest.version} is available.`:'You’re up to date.');
       const notice=document.querySelector('#update-notice');notice.hidden=!info.available;
-      if(info.available && info.latest.url===`https://github.com/Ethan0429/tinysearch/releases/tag/v${info.latest.version}`){
-        document.querySelector('#update-heading').textContent=`TinySearch ${info.latest.version} is available`;
-        document.querySelector('#update-download').href=info.latest.url;
+      const history=document.querySelector('#release-history');
+      if(chrome){history.href=storeURL;history.replaceChildren(document.createTextNode('Chrome Web Store '),TinyIcons.create('arrow-up-right'));}
+      if(info.available){
+        const expected=chrome?storeURL:`https://github.com/Ethan0429/tinysearch/releases/tag/v${info.latest.version}`;
+        if(info.latest.url===expected){
+          document.querySelector('#update-heading').textContent=`TinySearch ${info.latest.version} ${chrome?'is ready':'is available'}`;
+          document.querySelector('#update-instructions').textContent=chrome?'Restart Chrome to finish installing this update.':'Download the new version, replace the loaded extension files, and reload it.';
+          const link=document.querySelector('#update-download');link.href=expected;
+          link.replaceChildren(document.createTextNode(chrome?'View in Chrome Web Store ':'Download update '),TinyIcons.create('arrow-up-right'));
+        }else notice.hidden=true;
       }
       remote=info.releases||[];showReleases(remote);
     }catch{document.querySelector('#update-status').textContent='Could not check for updates. Try again later.';showReleases([]);}

@@ -3,6 +3,8 @@
   const DR = globalThis.DR = globalThis.DR || {};
   DR.RELAY = 'https://discord-relay-production-861c.up.railway.app';
   DR.UPDATES = 'https://tinysearch.up.railway.app/v1/extension';
+  DR.CHROME_STORE_ID = 'lgonddigopjaghgljjhjokpkpglcaboc';
+  DR.CHROME_STORE = 'https://chromewebstore.google.com/detail/tinysearch/lgonddigopjaghgljjhjokpkpglcaboc';
   DR.REPOSITORY = 'https://github.com/Ethan0429/tinysearch';
   DR.DEFAULTS = { enabled: true, inline: true, compact: true };
   DR.safeURL = value => {
