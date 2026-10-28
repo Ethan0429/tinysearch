@@ -1,1 +1,1 @@
-Display sourced research answers to questions from Destiny's stream within Destiny.gg chat, with local answer history, source links, and copy controls.
+Display sourced research answers to questions asked on stream, with DGG chat cards, optional notifications on other tabs, local answer history, source links, stream timestamps and copy controls.

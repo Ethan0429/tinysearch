@@ -8,6 +8,8 @@
   const managed = chrome && api.runtime.id === DR.CHROME_STORE_ID;
   let state = {answers: [], cursor: null, checkedAt: 0, lastSuccess: 0, nextPoll: 0, failures: 0, etag: null, etagURL: null, error: null};
   let prefs = {...DR.DEFAULTS};
+  const notificationAlarm = 'tinysearch-answers';
+  let toastDelivery = {since:0,seen:[]};
   let flight, updateFlight, nativeFlight;
   let updates = {version:1,releases:[],latest:null,nextCheck:0,checkedAt:0,error:null};
   let browserUpdate = {installed,status:managed?'automatic':'unpacked',version:null,attemptedAt:0,error:null};
@@ -70,12 +72,55 @@
     checkReleaseNotes().catch(()=>{});
     return refresh?checkChromeUpdate():updateInfo();
   }
-  const loaded=api.storage.local.get(['feed','preferences','updates','browserUpdate']).then(data=>{
+  const loaded=api.storage.local.get(['feed','preferences','updates','browserUpdate','toastDelivery']).then(data=>{
     if(data.feed)state={...state,...data.feed,answers:DR.merge([],data.feed.answers||[])};
     prefs={...prefs,...data.preferences};
+    if(data.toastDelivery)toastDelivery={since:Number(data.toastDelivery.since)||0,seen:(data.toastDelivery.seen||[]).filter(id=>/^[a-f0-9]{24}$/.test(id)).slice(-200)};
+    if(prefs.notifications&&!toastDelivery.since)toastDelivery.since=Date.now();
     if(data.updates){try{updates={...updates,...data.updates,...DR.releaseFeed(data.updates)};}catch{}}
     if(managed&&data.browserUpdate?.installed===installed)browserUpdate={...browserUpdate,...data.browserUpdate};
     updateBadge().catch(()=>{});
+  });
+  async function hasNotificationAccess() {
+    return !!(await api.permissions?.contains?.(DR.NOTIFICATION_ACCESS));
+  }
+  async function clearToasts() {
+    for(const tab of await api.tabs?.query?.({})||[])
+      api.tabs.sendMessage(tab.id,{type:'DR_TOAST_CLEAR'},{frameId:0}).catch(()=>{});
+  }
+  async function configureNotifications(clear=false) {
+    await loaded;
+    if(prefs.notifications && !await hasNotificationAccess()) {
+      prefs.notifications=false;
+      await api.storage.local.set({preferences:prefs});
+    }
+    if(prefs.enabled&&prefs.notifications) {
+      const alarm=await api.alarms.get(notificationAlarm);
+      if(!alarm||alarm.periodInMinutes!==0.5)await api.alarms.create(notificationAlarm,{periodInMinutes:0.5});
+    } else {
+      await api.alarms?.clear?.(notificationAlarm);
+      if(clear)await clearToasts();
+    }
+  }
+  async function deliverToasts(answers) {
+    if(!answers.length || !prefs.enabled || !prefs.notifications || !await hasNotificationAccess())return;
+    const window=await api.windows.getLastFocused();
+    if(!window.focused)return;
+    const [tab]=await api.tabs.query({active:true,lastFocusedWindow:true});
+    if(!tab?.id || !DR.notificationPage(tab.url))return;
+    await api.scripting.executeScript({target:{tabId:tab.id},files:['toast.js']});
+    // Recheck the preference after asynchronous injection, so disabling cannot
+    // race a pending delivery onto the page.
+    if(!prefs.enabled||!prefs.notifications)return;
+    await api.tabs.sendMessage(tab.id,{type:'DR_TOAST_SHOW',answers},{frameId:0});
+  }
+  loaded.then(()=>configureNotifications()).catch(()=>{});
+  api.runtime.onStartup?.addListener(()=>configureNotifications().catch(()=>{}));
+  api.runtime.onInstalled?.addListener(()=>configureNotifications().catch(()=>{}));
+  api.permissions?.onRemoved?.addListener(()=>configureNotifications(true).catch(()=>{}));
+  api.alarms?.onAlarm?.addListener(alarm=>{
+    if(alarm.name!==notificationAlarm)return;
+    return refresh().catch(()=>{});
   });
   if(managed)api.runtime.onUpdateAvailable?.addListener(async details=>{
     await loaded;
@@ -91,6 +136,7 @@
     if (!prefs.enabled || Date.now() < state.nextPoll) return;
     let cursor = state.cursor;
     let fresh = [];
+    let notices = [];
     try {
       for (let page = 0; page < 5; page++) {
         const path = '/v1/answers?limit=100' + (cursor ? '&after=' + encodeURIComponent(cursor) : '');
@@ -110,7 +156,11 @@
         cursor = data.next_cursor || cursor;
         if (!data.has_more) break;
       }
+      if(prefs.notifications)notices=DR.notificationCandidates(fresh,{
+        since:toastDelivery.since,seen:new Set([...toastDelivery.seen,...state.answers.map(answer=>answer.id)])
+      });
       state.answers = DR.merge(state.answers, fresh);
+      toastDelivery.seen=[...new Set([...toastDelivery.seen,...notices.map(answer=>answer.id)])].slice(-200);
       state.cursor = cursor;
       state.lastSuccess = Date.now(); state.failures = 0; state.error = null;
       state.nextPoll = Date.now() + 15000;
@@ -120,15 +170,21 @@
       state.nextPoll = Date.now() + Math.min(15000 * 2 ** Math.min(state.failures, 4), 300000);
     }
     state.checkedAt = Date.now();
-    await api.storage.local.set({feed: state});
+    // Commit IDs before displaying: a worker restart cannot replay a toast.
+    await api.storage.local.set({feed: state,toastDelivery});
+    await deliverToasts(notices).catch(()=>{});
+  }
+  async function refresh() {
+    await loaded;
+    if (!flight) flight = poll().finally(() => { flight = null; });
+    return flight;
   }
   async function dispatch(message, sender) {
     await loaded;
     if (!DR.allowedSender(sender, api.runtime.id)) throw new Error('Unsupported sender');
     if (message?.type === 'DR_FEED') {
       checkUpdates().catch(()=>{});
-      if (!flight) flight = poll().finally(() => { flight = null; });
-      await flight;
+      await refresh();
       return {answers: DR.merge([], state.answers), preferences: prefs, lastSuccess: state.lastSuccess, error: state.error, nextPoll: state.nextPoll, updates:updateInfo()};
     }
     if (message?.type === 'DR_RELEASES') {
@@ -138,8 +194,11 @@
     if (message?.type === 'DR_PREFERENCES') {
       if (!['chrome-extension:', 'moz-extension:'].includes(new URL(sender.url).protocol)) throw new Error('Settings require extension UI');
       if (message.patch) {
+        if(message.patch.notifications===true&&!await hasNotificationAccess())throw new Error('Website permission required');
+        if(message.patch.notifications===true&&!prefs.notifications || message.patch.enabled===true&&!prefs.enabled)toastDelivery={since:Date.now(),seen:[]};
         for (const key of Object.keys(DR.DEFAULTS)) if (typeof message.patch[key] === 'boolean') prefs[key] = message.patch[key];
-        await api.storage.local.set({preferences: prefs});
+        await api.storage.local.set({preferences: prefs,toastDelivery});
+        await configureNotifications(true);
       }
       return {preferences: prefs};
     }

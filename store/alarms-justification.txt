@@ -1,0 +1,1 @@
+The alarms permission schedules public answer-feed checks about every 30 seconds while optional answer notifications are enabled, so notifications work with Destiny.gg closed. The alarm is removed when notifications or TinySearch are disabled. It does not access website data.

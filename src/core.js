@@ -6,7 +6,17 @@
   DR.CHROME_STORE_ID = 'lgonddigopjaghgljjhjokpkpglcaboc';
   DR.CHROME_STORE = 'https://chromewebstore.google.com/detail/tinysearch/lgonddigopjaghgljjhjokpkpglcaboc';
   DR.REPOSITORY = 'https://github.com/Ethan0429/tinysearch';
-  DR.DEFAULTS = { enabled: true, inline: true, compact: true };
+  DR.DEFAULTS = { enabled: true, inline: true, compact: true, notifications: false };
+  DR.NOTIFICATION_ACCESS = {permissions:['scripting'],origins:['http://*/*','https://*/*']};
+  DR.notificationCandidates = (answers, {since, seen, now = Date.now()}) => DR.merge([], answers, now)
+    .filter(answer => !seen.has(answer.id) && Date.parse(answer.created_at) >= Math.max(since, now - 120000));
+  DR.notificationPage = value => {
+    try {
+      const url = new URL(value);
+      return ['http:', 'https:'].includes(url.protocol) &&
+        !['destiny.gg','www.destiny.gg','chromewebstore.google.com','addons.mozilla.org'].includes(url.hostname);
+    } catch { return false; }
+  };
   DR.safeURL = value => {
     try {
       const url = new URL(value);

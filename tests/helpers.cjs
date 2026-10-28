@@ -19,19 +19,25 @@ async function ui(){
   window.eval(read('core.js'));window.eval(read('clipboard.js'));window.DR.styles=read('ui.css');window.eval(read('vendor/markdown-it.min.js'));window.eval(read('markdown.js'));window.eval(read('icons.js'));window.eval(read('ui.js'));
   return window;
 }
-function background({responses=[],feed,preferences,fetcher,updates,installed="0.1.4",channel="firefox",managed=true,updateCheck=async()=>({status:"no_update"}),browserUpdate}={}){
+function background({responses=[],feed,preferences,fetcher,updates,installed="0.1.4",channel="firefox",managed=true,updateCheck=async()=>({status:"no_update"}),browserUpdate,toastDelivery,notificationAccess=false,activeTab={id:8,url:'https://example.org/'},windowFocused=true,injectError=false}={}){
   let clock=now,calls=[],nativeCalls=[],badges=[];let availableListener;
-  const stored={feed,preferences,browserUpdate,updates:updates||{version:1,releases:[],latest:null,nextCheck:now+3600000,checkedAt:now}};let listener;
+  const stored={feed,preferences,browserUpdate,toastDelivery,updates:updates||{version:1,releases:[],latest:null,nextCheck:now+3600000,checkedAt:now}};let listener,alarmListener,removedListener,alarm;
+  const injections=[],toasts=[];
   const api={action:{async setBadgeText(value){badges.push(value.text);}},runtime:{id:channel==='chrome'&&managed?'lgonddigopjaghgljjhjokpkpglcaboc':'test-extension',getManifest:()=>({version:installed,...(channel==='firefox'?{browser_specific_settings:{gecko:{id:'test'}}}:{})}),async requestUpdateCheck(){nativeCalls.push(clock);return updateCheck();},onUpdateAvailable:{addListener(fn){availableListener=fn;}},onMessage:{addListener(fn){listener=fn;}}},storage:{local:{
     async get(){return structuredClone(stored);},async set(data){Object.assign(stored,structuredClone(data));}
   }}};
+  api.permissions={async contains(){return notificationAccess;},onRemoved:{addListener(fn){removedListener=fn;}}};
+  api.alarms={async get(){return alarm;},async create(name,options){alarm={name,...options};},async clear(){alarm=null;},onAlarm:{addListener(fn){alarmListener=fn;}}};
+  api.windows={async getLastFocused(){return {focused:windowFocused};}};
+  api.tabs={async query(){return activeTab?[activeTab]:[];},async sendMessage(id,message){toasts.push({id,message});return {ok:true};}};
+  api.scripting={async executeScript(options){if(injectError)throw new Error('Restricted page');injections.push(options);}};
   class Clock extends Date{static now(){return clock;}}
   const context=vm.createContext({URL,Date:Clock,Map,Set,AbortSignal,console,structuredClone,
     chrome:api,fetch:async(url,options)=>{calls.push({url,options});const result=fetcher?await fetcher(url,options):responses.shift();if(!result)throw new Error('Offline');return result;}});
   vm.runInContext(read('core.js')+'\n'+read('background.js'),context);
   const sender={id:api.runtime.id,url:'https://www.destiny.gg/embed/chat?follow=%2Fbigscreen',tab:{id:1}};
   const send=(message={type:'DR_FEED'},from=sender)=>new Promise(resolve=>listener(message,from,resolve));
-  return {send,calls,stored,sender,nativeCalls,badges,async emitUpdate(details){return availableListener?.(details);},advance(ms){clock+=ms;},context};
+  return {send,calls,stored,sender,nativeCalls,badges,injections,toasts,get alarm(){return alarm;},async emitAlarm(){return alarmListener?.({name:'tinysearch-answers'});},async revokeAccess(){notificationAccess=false;return removedListener?.();},async emitUpdate(details){return availableListener?.(details);},advance(ms){clock+=ms;},context};
 }
 const response=(answers=[],extra={},status=200)=>new Response(JSON.stringify({version:1,answers,next_cursor:answers.at(-1)?.id||null,has_more:false,...extra}),{status,headers:{etag:'"test"'}});
 module.exports={read,root,now,answer,core,ui,background,response};
