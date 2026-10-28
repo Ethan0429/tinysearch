@@ -32,6 +32,8 @@ Paste the contents of each matching text file into its form field:
 - clipboardWrite: `clipboardWrite-justification.txt`
 - storage: `storage-justification.txt`
 - Host permissions: `host-permissions-justification.txt`
+- Optional scripting: `scripting-justification.txt`
+- Alarms: `alarms-justification.txt`
 - Remote code: select **No, I am not using remote code**. If the form still offers
   an explanation, use `remote-code-explanation.txt`.
 
@@ -39,8 +41,8 @@ Fetching public JSON is not loading executable code. See:
 https://developer.chrome.com/docs/webstore/program-policies/mv3-requirements
 
 The clipboard permission is used by `src/clipboard.js` and the explicit copy
-buttons in `src/ui.js`; storage is used by `src/background.js`; the only remote
-fetch destinations are the two fixed HTTPS feed hosts. The package contains its
+buttons in `src/ui.js` and `src/toast.js`; storage is used by `src/background.js`; the only remote
+fetch destinations are public answer and release endpoints on tinysearch.app. Optional scripting and website access display notifications only after the user enables them. Alarms check for new answers with DGG closed. The package contains its
 own Markdown renderer and SVG icons. No declared permission is unused.
 
 ## Data-use review and certification

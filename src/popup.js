@@ -9,12 +9,25 @@
       const data = await api.runtime.sendMessage({type:'DR_PREFERENCES'});
       if(!data.preferences)throw new Error('Unavailable');
       for(const input of inputs)input.checked=data.preferences[input.id];
-      status.textContent='Preferences apply within 15 seconds.';
+      status.textContent='Preferences are saved on this device.';
       for(const input of inputs)input.addEventListener('change',()=>{
         const patch={[input.id]:input.checked};
-        save=save.then(()=>api.runtime.sendMessage({type:'DR_PREFERENCES',patch})).then(result=>{
-          status.textContent=result.preferences?'Saved · applies within 15 seconds.':'Could not save. Reopen and try again.';
-        }).catch(()=>{status.textContent='Could not save. Reopen and try again.';});
+        // Request directly in the click handler; queuing this call loses the
+        // user gesture required by Firefox and Chrome optional permissions.
+        const permission=input.id==='notifications'&&input.checked
+          ? api.permissions.request(DR.NOTIFICATION_ACCESS).catch(()=>false)
+          : Promise.resolve(true);
+        input.disabled=true;
+        save=save.then(async()=>{
+          if(!await permission){input.checked=false;status.textContent='Website access was not granted. Notifications remain off.';return null;}
+          const result=await api.runtime.sendMessage({type:'DR_PREFERENCES',patch});
+          if(input.id==='notifications'&&!input.checked&&result.preferences)await api.permissions.remove(DR.NOTIFICATION_ACCESS).catch(()=>{});
+          return result;
+        }).then(result=>{
+          if(!result)return;
+          status.textContent=result.preferences?'Saved.':'Could not save. Reopen and try again.';
+          if(result.preferences)input.checked=!!result.preferences[input.id];
+        }).catch(()=>{input.checked=!patch[input.id];status.textContent='Could not save. Reopen and try again.';}).finally(()=>{input.disabled=false;});
       });
     }catch{status.textContent='Could not load preferences. Reopen to retry.';for(const input of inputs)input.disabled=true;}
   }

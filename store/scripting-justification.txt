@@ -1,0 +1,1 @@
+Optional scripting permission is requested only when the user enables Answers on other tabs. It injects the bundled toast.js into the active tab to display a short public research summary with source links, copy and dismiss controls. It does not execute downloaded code or read the page's content.

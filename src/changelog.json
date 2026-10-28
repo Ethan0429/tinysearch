@@ -1,6 +1,10 @@
 {
   "releases": [
     {
+      "version": "0.1.11",
+      "notes": "- Optional, translucent answer notifications in the corner of other browser tabs. Enable Answers on other tabs in the popup and grant website access.\n- Notifications show the same short summary and source links as DGG chat, with copy and dismiss controls.\n- Background checks continue with DGG closed. Old answers are not replayed, and notifications are deduplicated across worker restarts."
+    },
+    {
       "version": "0.1.10",
       "notes": "- Moved the public dashboard, answer feed and release notes to tinysearch.app.\n- Service permissions now use a single TinySearch domain."
     },
